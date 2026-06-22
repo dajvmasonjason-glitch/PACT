@@ -8,20 +8,31 @@
 
 ```
 pact-main/
-├── full-finetune/      # Full-parameter model merging (ViT-B-16, ViT-L-14, 8 tasks)
-│   ├── src/merging/    # Merging methods: Iso-C, Iso-CTS, PACT
-│   ├── src/utils/      # PACT utilities (Fisher-guided SVD composition)
-│   ├── config/         # Experiment configuration
-│   └── analysis/       # Motivation experiments
-│       ├── lbw_parameters/   # Scalar LBW pipeline (M0-M4)
-│       └── lbw_subspaces/    # Subspace-level LBW analysis
+├── full-finetune/           # Full-parameter model merging (ViT-B-16, ViT-B-32, ViT-L-14)
+│   ├── main.py              # Main entry point for merging & evaluation
+│   ├── finetune.py          # Fine-tuning script
+│   ├── config/              # Hydra experiment configuration
+│   ├── src/
+│   │   ├── utils/           # Merging methods (PACT, Iso-C, Iso-CTS, TIES, etc.) & utilities
+│   │   ├── eval/            # Evaluation metrics and helpers
+│   │   ├── models/          # Model definitions (ViT-B-16, ViT-L-14)
+│   │   └── datasets/        # Dataset loading and preprocessing
+│   └── analysis/            # LBW motivation experiments
+│       ├── lbw_parameters/  # Scalar LBW pipeline (M0-M4, merge recovery, diagnostics)
+│       └── lbw_subspaces/   # Subspace analysis (ablation, E_in, Sim/Inf heatmaps)
 │
-└── lora/               # LoRA-based model merging (ViT-B/32, ViT-L/14, Llama3-8B)
-    ├── configs/        # Experiment configs (PACT-TA, PACT-IsoC, and baselines)
-    ├── training_scripts/  # Vision and language model fine-tuning
-    ├── eval_scripts/   # Evaluation scripts
-    ├── dataset/        # Data loading and head generation
-    └── models/         # Model definitions
+└── lora/                    # LoRA-based model merging (ViT-B/32, ViT-L/14)
+    ├── task_merger.py       # Core merge orchestrator
+    ├── merging_functions.py # Merge operation implementations
+    ├── pact_ta.py           # PACT-TA: PACT with Task Arithmetic
+    ├── pact_ta_rsvd.py      # PACT-TA with randomized SVD
+    ├── pact_isoc.py         # PACT-IsoC: PACT with Isotropic merging
+    ├── pact_isoc_rsvd.py    # PACT-IsoC with randomized SVD
+    ├── configs/             # Experiment configs for all methods
+    ├── training_scripts/    # LoRA fine-tuning scripts
+    ├── eval_scripts/        # Evaluation scripts
+    ├── models/              # Model wrappers
+    └── dataset/             # Data loading and CLIP head generation
 ```
 
 ## 🚀 Quick Start
