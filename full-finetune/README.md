@@ -1,6 +1,6 @@
 # PACT: Full Fine-Tuning Model Merging
 
-This folder contains the **full fine-tuning (full-finetune)** branch of the **PACT** project, which performs full-parameter merging of vision models (ViT-B-16, ViT-L-14) across 8 tasks.
+This folder contains the **full fine-tuning (full-finetune)** branch of the **PACT** project, which performs full-parameter merging of vision models (ViT-B-16, ViT-B-32, ViT-L-14) across 8 tasks.
 
 The codebase follows the structure of **[Iso-Merging](https://github.com/danielm1405/iso-merging)** (ICML 2025), with PACT-specific additions listed below.
 
@@ -11,11 +11,33 @@ PACT introduces new merging methods alongside the original Iso-C / Iso-CTS basel
 
 | Method | Description |
 |--------|-------------|
-| `PACT` | Principal-Axis Composition Task merging — uses singular value decomposition guided by Fisher information to select and compose task-specific subspaces |
+| `PACT` | Preserving Anchored Cores in Task-vectors — a pre-processing step that identifies LBW dimensions, aligns task vector orthogonal complements with the pre-trained weight subspace, and removes aligned components before merging. Can be combined with any merging backbone. |
+| `SIFT` | Static-PACT (Appendix) — a simplified variant that directly removes task vector projections onto the pre-trained core space, without extracting per-task top-k directions.|
+
+Available backbone combinations:
+- `pact_ta` / `pact_ta_rsvd` — PACT + Task Arithmetic
+- `pact_isoc` / `pact_isoc_rsvd` — PACT + Iso-C
+- `pact_isocts` — PACT + Iso-CTS
+- `pact_tsvm` / `pact_tsvm_rsvd` — PACT + TSVM
+- `sift_ta` / `sift_isoc` — SIFT + TA / SIFT + Iso-C
+
+Configs with `_rsvd` suffix use randomized SVD for improved scalability on larger models.
 
 Key implementation files:
-- `src/utils/pact_utils.py` — Core PACT merging utilities (Fisher-guided SVD composition)
-- `src/merging/pact_merge.py` — PACT merging entry point
+- `src/utils/pact_utils.py` — Core PACT logic (LBW subspace alignment, task vector filtering)
+- `src/utils/sift_utils.py` — SIFT (static-PACT) filtering
+- `config/method/pact_*.yaml` — PACT method configs for each merging backbone
+
+### Hyperparameters
+All PACT hyperparameters are configured in `config/method/pact_*.yaml`:
+
+**Rank selection** (`rank_selection`): controls how the pre-trained core space dimension is determined.
+- `fixed` — uses a fixed ratio of the total dimension. Set `K_ratio` (pre-trained core ratio, default 0.8) and `k_per_task` (dimensions per task, default 10).
+- `adaptive` — uses energy-based thresholds on the singular value spectrum. Set `tau_pre` (pre-trained energy threshold, default 0.85) and `tau_task` (task energy threshold, default 0.95).
+
+**Layer ratio** (`pact_layer_ratio`): controls which fraction of 2D weight matrices PACT is applied to, counting from shallow to deep layers. Default is `1.0` (all layers). For example, `0.5` applies PACT only to the first half of layers. The merging backbone (TA, Iso-C, etc.) still operates on all layers regardless.
+
+**Layer type filtering** (`pact_include_patterns` / `pact_exclude_patterns`): selectively apply PACT filtering to specific layer types by name pattern (e.g., `["attn.in_proj", "mlp.c_fc"]`). Set to `null` (default) to apply to all 2D layers.
 
 ### Motivation Analysis
 The `analysis/` folder contains code to reproduce all motivation experiments from the PACT paper:
@@ -48,7 +70,7 @@ This project follows the Iso-Merging dependency stack (PyTorch, Hydra, wandb, ti
 - **Iso-CTS**: Isotropic Merging in Common and Task-Specific Subspaces — merge in common subspace, replace least significant singular vectors with task-specific ones.
 
 ### PACT Method
-- **PACT**: Principal-Axis Composition Task merging — Fisher-guided SVD composition that selects and aligns task-specific principal axes, then merges them through an optimized subspace composition.
+- **PACT**: Preserving Anchored Cores in Task-vectors — a pre-processing step that identifies Load-Bearing Wall (LBW) dimensions (task-critical knowledge embedded in pre-trained weights), aligns their orthogonal complements with the pre-trained weight subspace, and removes the aligned components from task vectors. The filtered task vectors can then be merged with any existing method. PACT variants are named `pact_<backbone>` (e.g., `pact_ta`, `pact_isoc`, `pact_isocts`, `pact_tsvm`), with `_rsvd` suffixes for the randomized SVD variant.
 
 ## 🧪 Merge and eval
 ```bash
@@ -59,8 +81,20 @@ num_tasks=8
 python main.py method="iso_c" model=${model} num_tasks=${num_tasks}
 python main.py method="iso_cts" model=${model} num_tasks=${num_tasks} method.common_space_fraction=0.8
 
-# PACT method
-python main.py method="pact" model=${model} num_tasks=${num_tasks}
+# PACT + Task Arithmetic
+python main.py method="pact_ta" model=${model} num_tasks=${num_tasks}
+python main.py method="pact_ta_rsvd" model=${model} num_tasks=${num_tasks}
+
+# PACT + Iso-C
+python main.py method="pact_isoc" model=${model} num_tasks=${num_tasks}
+python main.py method="pact_isoc_rsvd" model=${model} num_tasks=${num_tasks}
+
+# PACT + Iso-CTS
+python main.py method="pact_isocts" model=${model} num_tasks=${num_tasks} method.common_space_fraction=0.8
+
+# PACT + TSVM
+python main.py method="pact_tsvm" model=${model} num_tasks=${num_tasks}
+python main.py method="pact_tsvm_rsvd" model=${model} num_tasks=${num_tasks}
 ```
 
 ## 🤝 Acknowledgements
