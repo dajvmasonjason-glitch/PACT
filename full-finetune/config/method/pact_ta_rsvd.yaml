@@ -1,0 +1,7 @@
+name: pact_ta_rsvd
+
+# 固定比例方法参数（随机SVD固定划分，无能量阈值）
+K_ratio: 0.8           # 预训练核心空间占总维度的比例
+k_per_task: 10         # 每个任务分配的维度数
+
+full_name: ${method.name}_Kratio=${method.K_ratio}_kpt=${method.k_per_task}

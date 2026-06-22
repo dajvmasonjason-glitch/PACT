@@ -1,0 +1,12 @@
+name: sift_isoc
+
+# 秩选择策略: 'adaptive' (能量阈值) 或 'fixed' (固定比例)
+rank_selection: fixed
+
+# 固定比例方法参数（当 rank_selection=fixed 时使用）
+K_ratio: 0.8           # 预训练核心空间占总维度的比例
+
+# 能量阈值方法参数（当 rank_selection=adaptive 时使用）
+tau_pre: 0.85          # 预训练能量阈值
+
+full_name: ${method.name}_${method.rank_selection}

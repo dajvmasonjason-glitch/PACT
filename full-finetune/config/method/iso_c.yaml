@@ -1,0 +1,10 @@
+name: iso_c
+k: 100
+use_ties: false
+ties_agg: "sum"
+enable_fp8: false  # simulate FP8 (e4m3) quantization on task vectors before merging
+use_magnitude_weighting: false  # apply Frobenius norm normalization before SVD (Data-Free Magnitude Normalization)
+aggregation_1d: "mean"  # 1D aggregation method: mean, median, sign_consensus, max_abs
+enable_layerwise_scaling: true  # apply prior-free layer-wise adaptive scaling to match original TA Frobenius norm
+
+full_name: ${method.name}_k=${method.k}_fp8=${method.enable_fp8}_magw=${method.use_magnitude_weighting}_agg1d=${method.aggregation_1d}_lws=${method.enable_layerwise_scaling}

@@ -1,0 +1,9 @@
+name: TSVM_rsvd
+k: 100
+use_ties: false
+ties_agg: "sum"
+
+# 随机SVD（torch.svd_lowrank）的幂迭代次数
+niter: 2
+
+full_name: ${method.name}_niter=${method.niter}

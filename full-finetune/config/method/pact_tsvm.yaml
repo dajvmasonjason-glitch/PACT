@@ -1,0 +1,31 @@
+name: pact_tsvm
+
+# 秩选择策略: 'adaptive' (能量阈值) 或 'fixed' (固定比例)
+rank_selection: fixed
+
+# 固定比例方法参数（当 rank_selection=fixed 时使用）
+K_ratio: 0.8           # 预训练核心空间占总维度的比例
+k_per_task: 10         # 每个任务分配的维度数
+
+# 能量阈值方法参数（当 rank_selection=adaptive 时使用）
+tau_pre: 0.85          # 预训练能量阈值
+tau_task: 0.95         # 任务能量阈值
+
+# PACT 作用范围：只对最靠前的 pact_layer_ratio 比例的 2D 矩阵做 PACT 过滤
+# 1.0 = 作用于全部 2D 矩阵（默认，等价于原始算法）
+# 例如 ViT-B-16 共 52 个可作用 2D 矩阵：0.25→前13个, 0.5→前26个
+# 步骤 5 的融合骨干（TSVM）仍对全部 2D 矩阵生效，仅过滤范围被限制
+pact_layer_ratio: 1.0
+
+# 按层类型名称选择性过滤（可选，None 表示不启用）
+# include: 白名单 — 只对名称包含这些 pattern 的层做 PACT，其余 2D 层不做
+# exclude: 黑名单 — 名称包含这些 pattern 的层不做 PACT，其余 2D 层正常做
+# 示例：只对 attn.in_proj 和 mlp.c_fc 做 PACT
+#   pact_exclude_patterns: ["attn.out_proj", "mlp.c_proj"]
+# 示例：只对 attn.out_proj 和 mlp.c_proj 做 PACT
+#   pact_include_patterns: ["attn.out_proj", "mlp.c_proj"]
+# 注意：include 和 exclude 同时设置时，先 apply include 再 apply exclude
+pact_include_patterns: null
+pact_exclude_patterns: null
+
+full_name: ${method.name}_${method.rank_selection}_l${method.pact_layer_ratio}

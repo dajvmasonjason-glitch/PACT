@@ -1,0 +1,17 @@
+name: pact_isocts
+
+# 秩选择策略: 'adaptive' (能量阈值) 或 'fixed' (固定比例)
+rank_selection: fixed
+
+# 固定比例方法参数（当 rank_selection=fixed 时使用）
+K_ratio: 0.8           # 预训练核心空间占总维度的比例
+k_per_task: 10         # 每个任务分配的维度数
+
+# 能量阈值方法参数（当 rank_selection=adaptive 时使用）
+tau_pre: 0.85          # 预训练能量阈值
+tau_task: 0.95         # 任务能量阈值
+
+# ISO-CTS 参数
+common_space_fraction: 0.8  # 共同空间占总维度的比例
+
+full_name: ${method.name}_${method.rank_selection}

@@ -1,0 +1,8 @@
+name: isoc_ns
+ns_iterations: 5
+ns_eps: 1e-8
+enable_fp8: false  # simulate FP8 (e4m3) quantization on task vectors before merging
+gram: false  # when true, avoids allocating intermediate A matrix to save GPU memory
+use_redundancy_weighting: false  # apply inverse-redundancy weighting before NS iteration
+
+full_name: ${method.name}_iter=${method.ns_iterations}_fp8=${method.enable_fp8}_gram=${method.gram}_redw=${method.use_redundancy_weighting}

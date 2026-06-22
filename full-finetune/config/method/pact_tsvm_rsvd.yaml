@@ -1,0 +1,11 @@
+name: pact_tsvm_rsvd
+
+# PACT 过滤参数（固定比例方法）
+K_ratio: 0.8           # 预训练核心空间占总维度的比例
+k_per_task: 10         # 每个任务分配的维度数
+
+# 随机SVD（torch.svd_lowrank）的幂迭代次数
+# 该参数同时控制 PACT 过滤阶段 和 TSVM 融合阶段 的随机 SVD
+niter: 2
+
+full_name: ${method.name}_Kratio=${method.K_ratio}_kpt=${method.k_per_task}_niter=${method.niter}
